@@ -20,7 +20,7 @@ public class Puzzle1 {
 
 	private static double calculateFuelRec(double mass) {
 		if(mass > 0) {
-			double fuel = Math.floor(mass / 3) - 2;
+			double fuel = calculateFuel(mass);
 			return fuel + calculateFuelRec(fuel);
 		}
 		return 0;
