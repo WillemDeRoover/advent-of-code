@@ -19,9 +19,9 @@ public class Puzzle5 {
 	private static int calculate(int[] inputs) {
 		int stored = 5;
 		for (int position = 0; position < inputs.length; ) {
-			int input = inputs[position];
-			int operation = calculateOperation(input);
-			int[] mode = calculateModes(input);
+			int operationCode = inputs[position];
+			int operation = calculateOperation(operationCode);
+			int[] mode = calculateModes(operationCode);
 			if (operation == 1) {
 				add(inputs, position, mode);
 				position = position + 4;
