@@ -48,9 +48,9 @@ public class Puzzle8 {
 				.get();
 	}
 
-	private static void showImage(String finalSolution) {
+	private static void showImage(String image) {
 		IntStream.range(0, pixelHeight)
-				.mapToObj(layer -> finalSolution.substring(pixelWidth * layer, pixelWidth * (layer + 1)))
+				.mapToObj(layer -> image.substring(pixelWidth * layer, pixelWidth * (layer + 1)))
 				.forEach(System.out::println);
 	}
 
