@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+//TODO clean up
 public class Puzzle10 {
 
 	private static List<Point> asteroids;
