@@ -3,6 +3,9 @@ package day9;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public class Puzzle9 {
 
@@ -47,10 +50,10 @@ public class Puzzle9 {
 				int operation = calculateOperation(operationCode);
 				int[] mode = calculateModes(operationCode);
 				if (operation == 1) {
-					add(position, mode);
+					mathOperation(Math::addExact, position, mode);
 					position = position + 4;
 				} else if (operation == 2) {
-					multiply(position, mode);
+					mathOperation(Math::multiplyExact, position, mode);
 					position = position + 4;
 				} else if (operation == 3) {
 					useInput(position, mode);
@@ -60,14 +63,14 @@ public class Puzzle9 {
 					position += 2;
 					return this.output;
 				} else if (operation == 5) {
-					position = movePositionIfNonZero(position, mode);
+					position = movePositionIf(v -> v > 0, position, mode);
 				} else if (operation == 6) {
-					position = movePositionIfZero(position, mode);
+					position = movePositionIf(v -> v == 0, position, mode);
 				} else if (operation == 7) {
-					lessThan(position, mode);
+					verify((v1, v2) -> v1 < v2, position, mode);
 					position += 4;
 				} else if (operation == 8) {
-					equals(position, mode);
+					verify(Long::equals, position, mode);
 					position += 4;
 				} else if (operation == 9) {
 					setRelativePosition(position, mode);
@@ -100,11 +103,47 @@ public class Puzzle9 {
 			return modes;
 		}
 
-		private void add(int operationPosition, int[] mode) {
+		private void mathOperation(BiFunction<Long, Long, Long> function, int operationPosition, int[] mode) {
 			long inputParameter1 = getParameter(operationPosition + 1, mode[0]);
 			long inputParameter2 = getParameter(operationPosition + 2, mode[1]);
 			int outputParameter = getLocation(operationPosition + 3, mode[2]);
-			write(inputParameter1 + inputParameter2, outputParameter);
+			write(function.apply(inputParameter1, inputParameter2), outputParameter);
+		}
+
+		private int movePositionIf(Predicate<Long> predicate, int operationPosition, int[] mode) {
+			long parameter = getParameter(operationPosition + 1, mode[0]);
+			if (predicate.test(parameter)) {
+				operationPosition = (int) getParameter(operationPosition + 2, mode[1]);
+			} else {
+				operationPosition += 3;
+			}
+			return operationPosition;
+		}
+
+		private void verify(BiPredicate<Long, Long> predicate, int operationPosition, int[] mode) {
+			long parameter1 = getParameter(operationPosition + 1, mode[0]);
+			long parameter2 = getParameter(operationPosition + 2, mode[1]);
+			int outputParameter = getLocation(position + 3, mode[2]);
+			if (predicate.test(parameter1, parameter2)) {
+				write(1, outputParameter);
+			} else {
+				write(0, outputParameter);
+			}
+		}
+
+		private void useInput(int position, int[] mode) {
+			int outputParameter = getLocation(position + 1, mode[0]);
+			write(inputQueue.remove(), outputParameter);
+		}
+
+		private void output(int operationPosition, int[] mode) {
+			int location = getLocation(operationPosition + 1, mode[0]);
+			this.output = program[location];
+		}
+
+		private void setRelativePosition(int position, int[] mode) {
+			long inputParamter = getParameter(position + 1, mode[0]);
+			this.relativePosition += inputParamter;
 		}
 
 		private long getParameter(int position, int mode) {
@@ -124,70 +163,6 @@ public class Puzzle9 {
 
 		private void write(long value, int location) {
 			program[location] = value;
-		}
-
-		private void multiply(int operationPosition, int[] mode) {
-			long input1 = getParameter(operationPosition + 1, mode[0]);
-			long input2 = getParameter(operationPosition + 2, mode[1]);
-			int outputParameter = getLocation(operationPosition + 3, mode[2]);
-			write(input1 * input2, outputParameter);
-		}
-
-		private void useInput(int position, int[] mode) {
-			int outputParameter = getLocation(position + 1, mode[0]);
-			write(inputQueue.remove(), outputParameter);
-		}
-
-		private void output(int operationPosition, int[] mode) {
-			int location = getLocation(operationPosition + 1, mode[0]);
-			this.output = program[location];
-		}
-
-		private int movePositionIfNonZero(int operationPosition, int[] mode) {
-			long parameter = getParameter(operationPosition + 1, mode[0]);
-			if (parameter > 0) {
-				operationPosition = (int) getParameter(operationPosition + 2, mode[1]);
-			} else {
-				operationPosition += 3;
-			}
-			return operationPosition;
-		}
-
-		private int movePositionIfZero(int operationPosition, int[] mode) {
-			long parameter = getParameter(operationPosition + 1, mode[0]);
-			if (parameter == 0) {
-				operationPosition = (int) getParameter(operationPosition + 2, mode[1]);
-			} else {
-				operationPosition += 3;
-			}
-			return operationPosition;
-		}
-
-		private void lessThan(int operationPosition, int[] mode) {
-			long parameter1 = getParameter(operationPosition + 1, mode[0]);
-			long parameter2 = getParameter(operationPosition + 2, mode[1]);
-			int outputParameter = getLocation(position + 3, mode[2]);
-			if (parameter1 < parameter2) {
-				write(1, outputParameter);
-			} else {
-				write(0, outputParameter);
-			}
-		}
-
-		private void equals(int operationPosition, int[] mode) {
-			long parameter1 = getParameter(operationPosition + 1, mode[0]);
-			long parameter2 = getParameter(operationPosition + 2, mode[1]);
-			int outputParameter = getLocation(position + 3, mode[2]);
-			if (parameter1 == parameter2) {
-				write(1, outputParameter);
-			} else {
-				write(0, outputParameter);
-			}
-		}
-
-		private void setRelativePosition(int position, int[] mode) {
-			long inputParamter = getParameter(position + 1, mode[0]);
-			this.relativePosition += inputParamter;
 		}
 	}
 }
