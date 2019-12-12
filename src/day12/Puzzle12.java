@@ -1,19 +1,24 @@
 package day12;
 
+import static java.util.stream.Collectors.toList;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Puzzle12 {
 
 	public static void main(String[] args) {
-		List<Pair> xAxis = Arrays.asList(new Pair(-7), new Pair(-12), new Pair(6), new Pair(4));
-		List<Pair> yAxis = Arrays.asList(new Pair(-8), new Pair(-3), new Pair(-17), new Pair(-10));
-		List<Pair> zAxis = Arrays.asList(new Pair(9), new Pair(-4), new Pair(-9), new Pair(-6));
+		List<Pair> xAxis = createAxis(-7, -12, 6, 4);
+		List<Pair> yAxis = createAxis(-8, -3, -17, -10);
+		List<Pair> zAxis = createAxis(9,-4,-9,-6);
 
 		calculateEnergyOfSystem(xAxis, yAxis, zAxis);
 		calculateStepsForFullCycle(xAxis, yAxis, zAxis);
+	}
+
+	private static List<Pair> createAxis(int... axis) {
+		return Arrays.stream(axis).mapToObj(Pair::new).collect(toList());
 	}
 
 	private static void calculateEnergyOfSystem(List<Pair> xAxis, List<Pair> yAxis, List<Pair> zAxis) {
@@ -60,7 +65,7 @@ public class Puzzle12 {
 	}
 
 	private static List<Pair> clone(List<Pair> axis) {
-		return axis.stream().map(Pair::new).collect(Collectors.toList());
+		return axis.stream().map(Pair::new).collect(toList());
 	}
 
 	private static boolean isSame(List<Pair> axis, List<Pair> otherAxis) {
