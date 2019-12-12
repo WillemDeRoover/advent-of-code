@@ -27,11 +27,11 @@ public class Puzzle11 {
 		}
 
 		System.out.println(colorMap.size() + " panels have been painted.");
-		print(colorMap);
+		paint(colorMap);
 	}
 
 
-	private static void print(Map<Point, Color> colorMap) {
+	private static void paint(Map<Point, Color> colorMap) {
 		int bottom = colorMap.keySet().stream().mapToInt(point -> point.y).min().getAsInt();
 		int top = colorMap.keySet().stream().mapToInt(point -> point.y).max().getAsInt();
 		int left = colorMap.keySet().stream().mapToInt(point -> point.x).min().getAsInt();
