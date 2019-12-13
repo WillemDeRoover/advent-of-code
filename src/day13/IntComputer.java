@@ -11,21 +11,20 @@ class IntComputer {
 
 	private long[] program;
 	private int position = 0;
-	private long output;
-	private boolean completed = false;
 	private int relativePosition = 0;
 	private Queue<Long> inputQueue = new LinkedList<>();
+	private Queue<Long> outputQueue = new LinkedList<>();
 
 	IntComputer(String code) {
 		this.program = compileCode(code);
 	}
 
-	long calculate(Long input) {
+	ExitCode processInput(Long input) {
 		inputQueue.add(input);
-		return calculate();
+		return process();
 	}
 
-	long calculate() {
+	ExitCode process() {
 		while (position < program.length) {
 			int operationCode = (int) program[position];
 			int operation = calculateOperation(operationCode);
@@ -37,12 +36,13 @@ class IntComputer {
 				mathOperation(Math::multiplyExact, position, mode);
 				position = position + 4;
 			} else if (operation == 3) {
-				useInput(position, mode);
+				if(!useInput(position, mode)) {
+					return ExitCode.WAITING_FOR_INPUT;
+				}
 				position += 2;
 			} else if (operation == 4) {
 				output(position, mode);
 				position += 2;
-				return this.output;
 			} else if (operation == 5) {
 				position = movePositionIf(v -> v > 0, position, mode);
 			} else if (operation == 6) {
@@ -57,17 +57,17 @@ class IntComputer {
 				setRelativePosition(position, mode);
 				position += 2;
 			} else if (operation == 99) {
-				completed = true;
-				return output;
+				return ExitCode.COMPLETED;
 			} else {
-				throw new RuntimeException("invalid operation");
+				return ExitCode.INVALID_STATUS;
 			}
 		}
-		return output;
+		return ExitCode.INVALID_STATUS;
 	}
 
-	public boolean isCompleted() {
-		return completed;
+
+	public Queue<Long> getOutput() {
+		return outputQueue;
 	}
 
 	private int calculateOperation(int operationDigit) {
@@ -112,15 +112,19 @@ class IntComputer {
 		}
 	}
 
-	private void useInput(int position, int[] mode) {
+	private boolean useInput(int position, int[] mode) {
+		if(inputQueue.isEmpty()) {
+			return false;
+		}
 		Long input = inputQueue.remove();
 		int outputParameter = getLocation(position + 1, mode[0]);
 		write(input, outputParameter);
+		return true;
 	}
 
 	private void output(int operationPosition, int[] mode) {
 		int location = getLocation(operationPosition + 1, mode[0]);
-		this.output = program[location];
+		this.outputQueue.add(program[location]);
 	}
 
 	private void setRelativePosition(int position, int[] mode) {
@@ -151,4 +155,11 @@ class IntComputer {
 		long[] program = Arrays.stream(code.split(",")).mapToLong(Long::valueOf).toArray();
 		return Arrays.copyOf(program, program.length * 5);
 	}
+
+	public enum ExitCode {
+		COMPLETED,
+		WAITING_FOR_INPUT,
+		INVALID_STATUS
+	}
 }
+
