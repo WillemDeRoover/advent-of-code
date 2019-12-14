@@ -34,10 +34,6 @@ public class Puzzle13 {
 		intComputer.process();
 	}
 
-	private static long getDirection() {
-		return Integer.compare(getPositionBall(), getPositionPaddle());
-	}
-
 	private static void processOutput() {
 		while(!intComputer.getOutput().isEmpty()) {
 			int x = (int) intComputer.getOutput().remove().longValue();
@@ -56,6 +52,27 @@ public class Puzzle13 {
 
 	private static boolean isACoordinate(int x) {
 		return x != SCORE_INDICATOR;
+	}
+
+	private static List<String> createNewRow() {
+		return Stream.generate(() -> "").limit(37).collect(Collectors.toList());
+	}
+
+	private static void drawGame() {
+		if (showOutput) {
+			gameBoard.keySet().stream()
+					.sorted(Integer::compareTo)
+					.forEach(rowNumber -> {
+						gameBoard.get(rowNumber).forEach(System.out::print);
+						System.out.println();
+					});
+
+			System.out.println();
+		}
+	}
+
+	private static long getDirection() {
+		return Integer.compare(getPositionBall(), getPositionPaddle());
 	}
 
 	private static int getPositionPaddle() {
@@ -81,23 +98,6 @@ public class Puzzle13 {
 								.filter(tile -> tile.equals(BLOCK))
 								.count()
 				).sum();
-	}
-
-	private static List<String> createNewRow() {
-		return Stream.generate(() -> "").limit(37).collect(Collectors.toList());
-	}
-
-	private static void drawGame() {
-		if (showOutput) {
-			gameBoard.keySet().stream()
-					.sorted(Integer::compareTo)
-					.forEach(rowNumber -> {
-						gameBoard.get(rowNumber).forEach(System.out::print);
-						System.out.println();
-					});
-
-			System.out.println();
-		}
 	}
 
 }
