@@ -14,15 +14,15 @@ public class Puzzle16 {
 	private static int[] basePattern = new int[] { 0, 1, 0, -1 };
 
 	public static void main(String[] args) {
-		verifyCorrectnesOfFlawedFrequencyTransmission();
+		verifyCorrectnessOfFlawedFrequencyTransmission();
 		decodeSignalWithFlawedFrequencyTransmission();
 	}
 
-	private static void verifyCorrectnesOfFlawedFrequencyTransmission() {
+	private static void verifyCorrectnessOfFlawedFrequencyTransmission() {
 		List<Integer> signal = createSignal(input, 0L);
 		List<List<Integer>> patterns = createPatterns(signal);
 		for(int iteration = 1; iteration <= 100; iteration++) {
-			transformSignal(signal, patterns);
+			signal = transformSignal(signal, patterns);
 		}
 		String result = signal.stream().limit(8).map(String::valueOf).collect(Collectors.joining(""));
 		System.out.println("The first eight digits of the signal after 100 iterations are: " + result);
@@ -58,10 +58,12 @@ public class Puzzle16 {
 		return pattern.subList(1, pattern.size());
 	}
 
-	private static void transformSignal(List<Integer> signal, List<List<Integer>> patterns) {
+	private static List<Integer> transformSignal(List<Integer> signal, List<List<Integer>> patterns) {
+		List<Integer> transformedSignal = new ArrayList<>();
 		for (int i = 0; i < signal.size(); i++) {
-			signal.set(i, applyPattern(patterns.get(i), signal));
+			transformedSignal.add(applyPattern(patterns.get(i), signal));
 		}
+		return transformedSignal;
 	}
 
 	private static int applyPattern(List<Integer> pattern, List<Integer> signal) {
