@@ -1,4 +1,4 @@
-package day6;
+package day06;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;

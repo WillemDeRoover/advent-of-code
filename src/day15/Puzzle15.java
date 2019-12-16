@@ -77,9 +77,7 @@ public class Puzzle15 {
 					possibleDirections.add(direction);
 				}
 			}
-			if(directionToPreviousLocation != null) {
-				possibleDirections.remove(directionToPreviousLocation);
-			}
+			possibleDirections.remove(directionToPreviousLocation);
 			return possibleDirections;
 		}
 

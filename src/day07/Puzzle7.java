@@ -1,4 +1,4 @@
-package day7;
+package day07;
 
 import static java.util.stream.Collectors.toList;
 
