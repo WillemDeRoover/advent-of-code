@@ -1,11 +1,11 @@
 package day16;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Puzzle16 {
@@ -24,12 +24,15 @@ public class Puzzle16 {
 		for(int iteration = 1; iteration <= 100; iteration++) {
 			signal = transformSignal(signal, patterns);
 		}
-		String result = signal.stream().limit(8).map(String::valueOf).collect(Collectors.joining(""));
-		System.out.println("The first eight digits of the signal after 100 iterations are: " + result);
+		System.out.println("The first eight digits of the signal after 100 iterations are: " + getMessage(signal));
 	}
 
 	private static List<Integer> createSignal(String inputSignal, Long offset) {
-		return IntStream.range(0, inputSignal.length()).skip(offset).map(index -> Character.getNumericValue(inputSignal.charAt(index))).boxed().collect(toList());
+		return IntStream.range(0, inputSignal.length())
+				.skip(offset)
+				.map(index -> Character.getNumericValue(inputSignal.charAt(index)))
+				.boxed()
+				.collect(toList());
 	}
 
 	private static List<List<Integer>> createPatterns(List<Integer> signal) {
@@ -74,6 +77,13 @@ public class Puzzle16 {
 		return Math.abs(result%10);
 	}
 
+	private static String getMessage(List<Integer> signal) {
+		return signal.stream()
+				.limit(8)
+				.map(String::valueOf)
+				.collect(joining(""));
+	}
+
 	private static void decodeSignalWithFlawedFrequencyTransmission() {
 		String repeatedInput = String.join("", Collections.nCopies(10000, input));
 		Long messageOffset = Long.valueOf(input.substring(0, 7));
@@ -88,8 +98,7 @@ public class Puzzle16 {
 			}
 		}
 
-		String result = signal.stream().limit(8).map(String::valueOf).collect(Collectors.joining(""));
-		System.out.println("The eight-digit message embedded in the final output is: " + result);
+		System.out.println("The eight-digit message embedded in the final output is: " + getMessage(signal));
 	}
 
 }
