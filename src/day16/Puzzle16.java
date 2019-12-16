@@ -33,29 +33,29 @@ public class Puzzle16 {
 	}
 
 	private static List<List<Integer>> createPatterns(List<Integer> signal) {
-		List<List<Integer>> patterns = new ArrayList<>();
-
-		for (int i = 0; i < signal.size(); i++) {
-			List<Integer> pattern = createPattern(i, signal.size());
-			patterns.add(pattern);
-		}
-		return patterns;
+		return IntStream.range(0, signal.size())
+				.mapToObj(index -> createPattern(index, signal.size()))
+				.collect(toList());
 	}
 
 	private static List<Integer> createPattern(int index, int length) {
 		ArrayList<Integer> pattern = new ArrayList<>();
-		int basePatternIndex = 0;
 		int repeating = index + 1;
-		for (int i = 0; i < length + 1; i++) {
-			if (i != 0 && i % repeating == 0) {
-				if (++basePatternIndex % basePattern.length == 0) {
-					basePatternIndex = 0;
+		patternGenerator: for(int aPattern : basePattern) {
+			for(int i = 0; i < repeating; i++) {
+				pattern.add(aPattern);
+				if(pattern.size() > length + 1) {
+					break patternGenerator;
 				}
-
 			}
-			pattern.add(basePattern[basePatternIndex]);
 		}
-		return pattern.subList(1, pattern.size());
+
+		while(pattern.size() <= length + 1) {
+			pattern.addAll(pattern);
+		}
+
+		return pattern.subList(1, length + 1);
+
 	}
 
 	private static List<Integer> transformSignal(List<Integer> signal, List<List<Integer>> patterns) {
