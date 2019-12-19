@@ -3,7 +3,6 @@ package day17;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.Queue;
 
 public class Puzzle17 {
 
@@ -90,10 +89,8 @@ public class Puzzle17 {
 	}
 
 	private static long retrieveVacuumRobotReport(IntComputer intComputer) {
-		Queue<Long> output = intComputer.getOutput();
-		while(output.size() > 1) {
-			output.remove();
-		}
-		return output.remove();
+		return intComputer.getOutput().stream()
+				.skip(intComputer.getOutput().size() - 1)
+				.findFirst().get();
 	}
 }
