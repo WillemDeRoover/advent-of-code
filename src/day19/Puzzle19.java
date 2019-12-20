@@ -18,7 +18,7 @@ public class Puzzle19 {
 		long affected = 0;
 		for(long x = 0; x < BEAM_AREA; x ++) {
 			for(long y = 0; y < BEAM_AREA; y++) {
-				if(isAffected(x, y)) {
+				if(isAttractedByBeam(x, y)) {
 					affected++;
 				}
 			}
@@ -30,8 +30,8 @@ public class Puzzle19 {
 		long y = 0;
 		long x = SHIP_SIZE;
 		while(true) {
-			if(isAffected(x, y)) {
-				if(isAffected(x - SHIP_SIZE, y + SHIP_SIZE)) {
+			if(isAttractedByBeam(x, y)) {
+				if(isAttractedByBeam(x - SHIP_SIZE, y + SHIP_SIZE)) {
 					return new Pair<>( x - SHIP_SIZE, y);
 				}
 				x++;
@@ -41,7 +41,7 @@ public class Puzzle19 {
 		}
 	}
 
-	private static boolean isAffected(long x, long y) {
+	private static boolean isAttractedByBeam(long x, long y) {
 		IntComputer intComputer = new IntComputer(input);
 		intComputer.processInput(x);
 		intComputer.processInput(y);
