@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+//TODO: optimize
 public class Puzzle20 {
 
 	private static char PATH = '.';
