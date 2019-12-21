@@ -28,25 +28,25 @@ public class Puzzle20 {
 		return intComputer;
 	}
 
-	private static void running(IntComputer intComputer) {
-		addRoutine(or("A", "J"), intComputer);
-		addRoutine(and("B", "J"), intComputer);
-		addRoutine(and("C", "J"), intComputer);
-		addRoutine(not("J", "J"), intComputer);
-		addRoutine(and("D", "J"), intComputer);
-		addRoutine(or("E", "T"), intComputer);
-		addRoutine(or("H", "T"), intComputer);
-		addRoutine(and("T", "J"), intComputer);
-		addRoutine("RUN", intComputer);
+	private static void walking(IntComputer intComputer) {
+		addInstruction(or("A", "J"), intComputer);
+		addInstruction(and("B", "J"), intComputer);
+		addInstruction(and("C", "J"), intComputer);
+		addInstruction(not("J", "J"), intComputer);
+		addInstruction(and("D", "J"), intComputer);
+		addInstruction("WALK", intComputer);
 	}
 
-	private static void walking(IntComputer intComputer) {
-		addRoutine(or("A", "J"), intComputer);
-		addRoutine(and("B", "J"), intComputer);
-		addRoutine(and("C", "J"), intComputer);
-		addRoutine(not("J", "J"), intComputer);
-		addRoutine(and("D", "J"), intComputer);
-		addRoutine("WALK", intComputer);
+	private static void running(IntComputer intComputer) {
+		addInstruction(or("A", "J"), intComputer);
+		addInstruction(and("B", "J"), intComputer);
+		addInstruction(and("C", "J"), intComputer);
+		addInstruction(not("J", "J"), intComputer);
+		addInstruction(and("D", "J"), intComputer);
+		addInstruction(or("E", "T"), intComputer);
+		addInstruction(or("H", "T"), intComputer);
+		addInstruction(and("T", "J"), intComputer);
+		addInstruction("RUN", intComputer);
 	}
 
 	private static String not(String register, String outputRegister) {
@@ -61,7 +61,7 @@ public class Puzzle20 {
 		return "OR " + register + " " + outputRegister;
 	}
 
-	private static void addRoutine(String routineSequence, IntComputer intComputer) {
+	private static void addInstruction(String routineSequence, IntComputer intComputer) {
 		List<Integer> collect = routineSequence.chars().boxed().collect(toList());
 		collect.add(NEW_LINE_ASCII);
 		collect.stream().mapToLong(i -> i).forEach(intComputer::processInput);
