@@ -41,6 +41,7 @@ public class Puzzle18 {
 	public static void main(String[] args) throws IOException {
 		maze = createMaze(VAULT_INPUT);
 		allKeys = getAllKeysInVault();
+		determineRoutesBetweenKeys();
 		nodeToDistanceMap.put(createEntranceNode(), 0);
 
 		while(minDistance == Integer.MAX_VALUE) {
@@ -49,6 +50,9 @@ public class Puzzle18 {
 
 		System.out.println(minDistance);
 
+	}
+
+	private static void determineRoutesBetweenKeys() {
 	}
 
 	private static Node createEntranceNode() {
