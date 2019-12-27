@@ -29,8 +29,6 @@ public class Puzzle20 {
 
 	private static Map<Location, Location> portals = new HashMap<>();
 	private static Map<String, List<Location>> portalToLocations = new HashMap<>();
-	private static Set<Location> innerLocations = new HashSet<>();
-	private static Set<Location> outerLocations = new HashSet<>();
 
 	public static void main(String[] args) throws IOException {
 		maze = createMaze(INPUT);
@@ -85,13 +83,6 @@ public class Puzzle20 {
 				locationList -> {
 					portals.put(locationList.get(0), locationList.get(1));
 					portals.put(locationList.get(1), locationList.get(0));
-					if (locationList.get(0).isOuterPortal()) {
-						outerLocations.add(locationList.get(0));
-						innerLocations.add(locationList.get(1));
-					} else {
-						outerLocations.add(locationList.get(1));
-						innerLocations.add(locationList.get(0));
-					}
 				}
 		);
 	}

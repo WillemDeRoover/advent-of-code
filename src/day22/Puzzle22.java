@@ -37,6 +37,17 @@ public class Puzzle22 {
 		return cardDeck.indexOf(card);
 	}
 
+	private static List<Integer> cut(int valueOf, List<Integer> cardDeck) {
+		int split = (valueOf + cardDeck.size())% cardDeck.size();
+		List<Integer> result = cardDeck.subList(split, cardDeck.size());
+		result.addAll(cardDeck.subList(0, split));
+		return result;
+	}
+
+	private static Integer getCutValue(String shuffle) {
+		return Integer.valueOf(shuffle.substring(CUT.length()));
+	}
+
 	private static List<Integer> dealIntoNewStack(List<Integer> cardDeck) {
 		return IntStream.range(0, cardDeck.size())
 				.map(index -> cardDeck.size()  - 1 - index)
@@ -54,17 +65,6 @@ public class Puzzle22 {
 
 	private static Integer getIncrementValue(String shuffle) {
 		return Integer.valueOf(shuffle.substring(DEAL_WITH_INCREMENT.length()));
-	}
-
-	private static List<Integer> cut(int valueOf, List<Integer> cardDeck) {
-		int split = (valueOf + cardDeck.size())% cardDeck.size();
-		List<Integer> result = cardDeck.subList(split, cardDeck.size());
-		result.addAll(cardDeck.subList(0, split));
-		return result;
-	}
-
-	private static Integer getCutValue(String shuffle) {
-		return Integer.valueOf(shuffle.substring(CUT.length()));
 	}
 
 	private static BigInteger getCardOnPosition(BigInteger card, BigInteger cardDeckSize, BigInteger shuffleAmount, List<String> shuffles) {

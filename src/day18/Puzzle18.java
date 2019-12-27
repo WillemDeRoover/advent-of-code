@@ -2,10 +2,14 @@ package day18;
 
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,230 +17,192 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Stream;
 
-//TODO clean up and optimize
 public class Puzzle18 {
-	private static char WALL = '#';
 
-	private static String INPUT = "src/day18/input.txt";
-	private static String VAULT_INPUT = "src/day18/vaultInput.txt";
-
-	private static List<String> createMaze(String url) throws IOException {
-		return Files.lines(Paths.get(url)).collect(toList());
-	}
-	
-	private static char ENTRANCE = '@';
-
-	private static List<String> maze;
-	private static Queue<Location> searchLocations = new LinkedList<>();
-	private static Set<Location> visitedLocations = new HashSet<>();
-	private static int minDistance = Integer.MAX_VALUE;
-	private static Map<Node, Integer> nodeToDistanceMap = new HashMap<>();
-	private static Set<Character> allKeys;
+	private static String INPUT = "src/day18/vaultinput.txt";
+	public static final List<Character> ENTRANCES = Arrays.asList('@', '$', '%', '&');
 
 	public static void main(String[] args) throws IOException {
-		maze = createMaze(VAULT_INPUT);
-		allKeys = getAllKeysInVault();
-		determineRoutesBetweenKeys();
-		nodeToDistanceMap.put(createEntranceNode(), 0);
+		Maze maze = new Maze(INPUT);
+		Map<Character, List<Path>> keyGraph = createKeyGraph(maze);
+		System.out.println(findShortestPathToAllKeys(keyGraph));
+	}
 
-		while(minDistance == Integer.MAX_VALUE) {
-			searchKeys();
+	private static Map<Character, List<Path>> createKeyGraph(Maze maze) {
+		return maze.getKeysAndEntranceLocation().entrySet().stream()
+				.collect(toMap(Map.Entry::getKey, entry -> createPaths(entry.getKey(), entry.getValue(), maze)));
+	}
+
+	private static List<Path> createPaths(Character fromKey, Location location, Maze maze) { ;
+		List<Path> paths = new ArrayList<>();
+		Queue<Location> searchQueue = new LinkedList<>();
+		Set<Location> visitedLocation = new HashSet<>();
+		searchQueue.add(location);
+		while(!searchQueue.isEmpty()){
+			Location currentLocation = searchQueue.remove();
+			visitedLocation.add(currentLocation);
+			if(maze.isKey(currentLocation) && currentLocation.currentDistance != 0) {
+				char toKey = maze.getTile(currentLocation);
+				paths.add(new Path(fromKey, toKey, currentLocation.currentDistance, currentLocation.currentDoors, currentLocation.currentKeys));
+				currentLocation.currentKeys.add(toKey);
+			} else if (maze.isDoor(currentLocation)) {
+				currentLocation.currentDoors.add(maze.getTile(currentLocation));
+			}
+			Set<Location> nextLocations = calculateNextLocations(currentLocation, maze);
+			nextLocations.removeAll(visitedLocation);
+			nextLocations.removeAll(searchQueue);
+			searchQueue.addAll(nextLocations);
 		}
-
-		System.out.println(minDistance);
-
+		return paths;
 	}
 
-	private static void determineRoutesBetweenKeys() {
+	private static Set<Location> calculateNextLocations(Location currentLocation, Maze maze) {
+		return Stream.of(currentLocation.getNorth(), currentLocation.getSouth(), currentLocation.getEast(), currentLocation.getWest())
+				.filter(location -> !maze.isWall(location))
+				.collect(toSet());
 	}
 
-	private static Node createEntranceNode() {
-		Set<Location> locations = new HashSet<>();
-		for(int y = 0; y < maze.size(); y++) {
-			for (int x = 0; x < maze.get(y).length(); x++) {
-				char tile = maze.get(y).charAt(x);
-				if(tile == ENTRANCE) {
-					locations.add(new Location(x, y, 0));
+	private static int findShortestPathToAllKeys(Map<Character, List<Path>> keyGraph) {
+		Set<Character> allKeys = keyGraph.keySet().stream().filter(key -> !ENTRANCES.contains(key)).collect(toSet());
+		Map<State, Integer> stateMap = initStateMap(keyGraph);
+
+		while(true) {
+			Map.Entry<State, Integer> lowestDistanceEntry = stateMap.entrySet().stream().min(Comparator.comparing(Map.Entry::getValue)).get();
+			State currentState = lowestDistanceEntry.getKey();
+			int currentDistance = lowestDistanceEntry.getValue();
+			stateMap.remove(currentState);
+
+			if(currentState.keySet.containsAll(allKeys)) {
+				return currentDistance;
+			}
+
+			for (Path availablePath : getAvailablePaths(currentState, keyGraph)) {
+				State state = currentState.updateWith(availablePath);
+				Integer previousDistance = stateMap.getOrDefault(state, Integer.MAX_VALUE);
+				int newDistance = currentDistance + availablePath.distance;
+				if(newDistance < previousDistance) {
+					stateMap.put(state, newDistance);
 				}
 			}
 		}
-
-		return new Node(emptySet(), locations);
 	}
 
-
-	private static void searchKeys() {
-		Map.Entry<Node, Integer> entry = nodeToDistanceMap.entrySet().stream().min(Comparator.comparing(Map.Entry::getValue)).get();
-		Node currentNode = entry.getKey();
-		Integer currentDistance = entry.getValue();
-		nodeToDistanceMap.remove(currentNode);
-		if(currentNode.getAvailableKeySet().containsAll(allKeys)) {
-			minDistance = currentDistance;
-		}
-
-		Set<Location> reachableKeyLocations = getAllReachableKeys(currentNode);
-		for (Location reachableKeyLocation : reachableKeyLocations) {
-
-			char key = reachableKeyLocation.getTile();
-
-			Set<Character> keySet = new HashSet<>(currentNode.getAvailableKeySet());
-			keySet.add(key);
-
-			Set<Location> newLocations = new HashSet<>(currentNode.getLocations());
-			newLocations.remove(reachableKeyLocation.originalLocation);
-			newLocations.add(reachableKeyLocation);
-			Node newNode = new Node(keySet, newLocations);
-
-			int newDistance = currentDistance + reachableKeyLocation.distance;
-			int existingDistance = nodeToDistanceMap.getOrDefault(newNode, Integer.MAX_VALUE);
-			if(existingDistance >= newDistance) {
-				nodeToDistanceMap.put(newNode, newDistance);
-			}
-		}
+	private static Map<State, Integer> initStateMap(Map<Character, List<Path>> keyGraph) {
+		Set<Character> entrances = keyGraph.keySet().stream().filter(ENTRANCES::contains).collect(toSet());
+		Map<State, Integer> stateMap = new HashMap<>();
+		stateMap.put(new State(entrances, emptySet()), 0);
+		return stateMap;
 	}
 
-
-	private static Set<Character> getAllKeysInVault() {
-		Set<Character> keys = new HashSet<>();
-		for(int y = 0; y < maze.size(); y++) {
-			for (int x = 0; x < maze.get(y).length(); x++) {
-				char tile = maze.get(y).charAt(x);
-				if(isKey(tile)) {
-					keys.add(tile);
-				}
-			}
-		}
-		return keys;
-	}
-
-	private static Set<Location> getAllReachableKeys(Node node) {
-		searchLocations = new LinkedList<>();
-		node.getLocations().stream().map(Location::reset).forEach(location -> searchLocations.add(location));
-		visitedLocations = new HashSet<>();
-		Set<Location> reachableKeyLocations = new HashSet<>();
-		while(!searchLocations.isEmpty()) {
-			findKeyLocations(node.getAvailableKeySet()).ifPresent(reachableKeyLocations::add);
-		}
-		return reachableKeyLocations;
-	}
-
-
-	private static Optional<Location> findKeyLocations(Set<Character> currentKeySet) {
-		Location currentLocation = searchLocations.remove();
-		char currentTile = currentLocation.getTile();
-		if(isKey(currentTile) && !currentKeySet.contains(currentTile)) {
-			return Optional.of(currentLocation);
-		} else if(isDoor(currentTile)) {
-			char key = Character.toLowerCase(currentTile);
-			if(currentKeySet.contains(key)) {
-				findNextPaths(currentLocation);
-			}
-		} else {
-			findNextPaths(currentLocation);
-		}
-		return Optional.empty();
-	}
-
-	private static boolean isKey(char currentTile) {
-		return Character.isLetter(currentTile) && Character.isLowerCase(currentTile);
-	}
-
-	private static boolean isDoor(char currentTile) {
-		return Character.isLetter(currentTile) && Character.isUpperCase(currentTile);
-	}
-
-	private static void findNextPaths(Location currentLocation) {
-		findHall(currentLocation).stream()
-				.filter(path -> !visitedLocations.contains(path))
-				.forEach(path -> {
-					searchLocations.add(path);
-					visitedLocations.add(path);
-				});
-	}
-
-	private static List<Location> findHall(Location location) {
-		Location northPath = new Location(location.x, location.y + 1, location.distance + 1, location.originalLocation);
-		Location southPath = new Location(location.x, location.y - 1, location.distance + 1, location.originalLocation);
-		Location eastPath = new Location(location.x + 1, location.y, location.distance + 1, location.originalLocation);
-		Location westPath = new Location(location.x -1, location.y, location.distance + 1, location.originalLocation);
-		return Stream.of(northPath, southPath, eastPath, westPath)
-				.filter(path -> path.getTile() != WALL)
+	private static List<Path> getAvailablePaths(State currentState, Map<Character, List<Path>> keyGraph) {
+		return currentState.currentPositions.stream()
+				.flatMap(currentPosition -> getAvailablePaths(currentPosition, currentState.keySet, keyGraph).stream())
 				.collect(toList());
 	}
 
-	private static class Node {
-		Set<Character> availableKeySet;
-		Set<Location> location;
+	private static List<Path> getAvailablePaths(char currentKey, Set<Character> currentKeySet, Map<Character, List<Path>> keyGraph) {
+		return keyGraph.get(currentKey).stream()
+						.filter(path -> !currentKeySet.contains(path.toKey)) //we don't have the destination key yet
+						.filter(path -> path.canReachKey(currentKeySet)) //we have all the keys to reach the destination key
+						.filter(path -> currentKeySet.containsAll((path.keys)))//we have all already collected all keys on the path to the destination key
+						.collect(toList());
+	}
 
-		public Node(Set<Character> availableKeySet, Set<Location> location) {
-			this.availableKeySet = availableKeySet;
-			this.location = location;
+	static class State {
+		Set<Character> currentPositions;
+		Set<Character> keySet;
+
+		State(Set<Character> currentPositions, Set<Character> keySet) {
+			this.currentPositions = currentPositions;
+			this.keySet = keySet;
 		}
 
-		public Set<Character> getAvailableKeySet() {
-			return availableKeySet;
-		}
-
-		public Set<Location> getLocations() {
-			return location;
+		State updateWith(Path path) {
+			State updatedState = new State(new HashSet<>(currentPositions), new HashSet<>(keySet));
+			updatedState.currentPositions.remove(path.fromKey);
+			updatedState.currentPositions.add(path.toKey);
+			updatedState.keySet.add(path.toKey);
+			return updatedState;
 		}
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
-			Node node = (Node) o;
-			return Objects.equals(availableKeySet, node.availableKeySet) &&
-					Objects.equals(location, node.location);
+			State state = (State) o;
+			return Objects.equals(currentPositions, state.currentPositions) &&
+					Objects.equals(keySet, state.keySet);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(availableKeySet, location);
+			return Objects.hash(currentPositions, keySet);
 		}
 	}
 
-	private static class Location {
+	static class Path {
+		char fromKey;
+		char toKey;
+		int distance;
+		Set<Character> doors;
+		Set<Character> keys; // keys that are on the path between fromKey and toKey
+
+		Path(char fromKey, char toKey, int distance, Set<Character> doors, Set<Character> keys) {
+			this.fromKey = fromKey;
+			this.toKey = toKey;
+			this.distance = distance;
+			this.doors = doors.stream().map(Character::toLowerCase).collect(toSet());
+			this.keys = new HashSet<>(keys);
+		}
+
+		boolean canReachKey(Set<Character> keys) {
+			return keys.containsAll(doors);
+		}
+	}
+
+	static class Location {
 		int x;
 		int y;
-		int distance;
-		Location originalLocation;
+		int currentDistance;
+		Set<Character> currentKeys;
+		Set<Character> currentDoors;
 
-		public Location(int x, int y, int distance) {
+		Location(int x, int y) {
 			this.x = x;
 			this.y = y;
-			this.distance = distance;
-			originalLocation = this;
+			this.currentDistance = 0;
+			this.currentKeys = new HashSet<>();
+			this.currentDoors = new HashSet<>();
 		}
 
-		public Location(int x, int y, int distance, Location location) {
+		private Location(int x, int y, int currentDistance, Set<Character> currentDoors, Set<Character> currentKeys) {
 			this.x = x;
 			this.y = y;
-			this.distance = distance;
-			this.originalLocation = location;
+			this.currentDistance = currentDistance;
+			this.currentDoors = new HashSet<>(currentDoors);
+			this.currentKeys = new HashSet<>(currentKeys);
 		}
 
-		char getTile() {
-			return maze.get(y).charAt(x);
+		Location getNorth() {
+			return new Location(x, y + 1, currentDistance + 1, currentDoors, currentKeys);
 		}
 
-		Location reset() {
-			return new Location(x, y, 0);
+		Location getSouth() {
+			return new Location(x, y - 1, currentDistance + 1, currentDoors, currentKeys);
+		}
+
+		Location getEast() {
+			return new Location(x + 1, y, currentDistance + 1, currentDoors, currentKeys);
+		}
+
+		Location getWest() {
+			return new Location(x - 1, y, currentDistance + 1, currentDoors, currentKeys);
 		}
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o)
-				return true;
-			if (o == null || getClass() != o.getClass())
-				return false;
 			Location location = (Location) o;
 			return x == location.x &&
 					y == location.y;
@@ -246,6 +212,64 @@ public class Puzzle18 {
 		public int hashCode() {
 			return Objects.hash(x, y);
 		}
+	}
+
+	static class Maze {
+		List<String> tiles;
+
+		Maze(String url) throws IOException {
+			tiles = Files.lines(Paths.get(url)).collect(toList());
+		}
+
+		char getTile(Location location) {
+			return tiles.get(location.y).charAt(location.x);
+		}
+
+		Map<Character, Location> getKeysAndEntranceLocation() {
+			int entranceIndex = 0;
+			Map<Character, Location> keyLocationMap = new HashMap<>();
+			for (int y = 0; y < tiles.size(); y++) {
+				for(int x = 0; x < tiles.get(y).length(); x++) {
+					char tile = tiles.get(y).charAt(x);
+					if(isKey(tile)) {
+						keyLocationMap.put(tile, new Location(x, y));
+					}
+					if(isEntrance(tile)) {
+						keyLocationMap.put(ENTRANCES.get(entranceIndex++), new Location(x, y));
+					}
+				}
+			}
+			return keyLocationMap;
+		}
+
+		boolean isKey(Location location) {
+			return isKey(tiles.get(location.y).charAt(location.x));
+		}
+
+		boolean isKey(char tile) {
+			return Character.isLetter(tile) && Character.isLowerCase(tile);
+		}
+
+		boolean isEntrance(char tile) {
+			return tile == '@';
+		}
+
+		boolean isDoor(Location location) {
+			return isDoor(tiles.get(location.y).charAt(location.x));
+		}
+
+		boolean isDoor(char tile) {
+			return Character.isLetter(tile) && Character.isUpperCase(tile);
+		}
+
+		boolean isWall(Location location) {
+			return isWall(tiles.get(location.y).charAt(location.x));
+		}
+
+		boolean isWall(char tile) {
+			return tile == '#';
+		}
+
 	}
 
 }

@@ -17,23 +17,18 @@ public class Puzzle23 {
 
 		intializeComputers();
 
-		boolean repeatingYFound = false;
+		boolean loopdetected = false;
 		Long previousY = null;
 
-		while(!repeatingYFound) {
+		while(!loopdetected) {
 			for (int i = 0; i < 50; i++) {
 				processInputQueue(i);
 				processOutputQueue(i);
-				if (allInputQueuesEmpty() && allOutputQueuesEmpty()) {
-					IntComputer computer = computerMap.get(0);
-					computer.processInput(NAT.x);
-					computer.processInput(NAT.y);
-					if (previousY != null && previousY == NAT.y) {
-						repeatingYFound = true;
-						break;
-					}
-					previousY = NAT.y;
-				}
+			}
+			if (allInputQueuesEmpty() && allOutputQueuesEmpty()) {
+				restartIdleNetwork();
+				loopdetected = detectLoop(previousY);
+				previousY = NAT.y;
 			}
 		}
 		System.out.println("The first Y value that was sent to computer 0 twice in a row is: " + previousY);
@@ -92,7 +87,17 @@ public class Puzzle23 {
 		return computerMap.values().stream().allMatch(intComputer -> intComputer.getOutput().isEmpty());
 	}
 
+	private static void restartIdleNetwork() {
+		IntComputer computer = computerMap.get(0);
+		computer.processInput(NAT.x);
+		computer.processInput(NAT.y);
+	}
+
+	private static boolean detectLoop(Long previousY) {
+		return previousY != null && previousY == NAT.y;
+	}
 	private static class Coordinate {
+
 		long x;
 		long y;
 
@@ -100,6 +105,6 @@ public class Puzzle23 {
 			this.x = x;
 			this.y = y;
 		}
-	}
 
+	}
 }
