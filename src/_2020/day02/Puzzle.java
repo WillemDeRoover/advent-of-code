@@ -10,12 +10,12 @@ public class Puzzle {
 	private static Pattern pattern = Pattern.compile("(\\d+)-(\\d+)\\s(\\w):\\s(\\w+)");
 
 	public static void main(String[] args) throws IOException {
-		long correctPasswordTotal1 = Files.lines(Paths.get("src/_2020/day02/input1.txt"))
+		long correctPasswordTotal1 = Files.lines(Paths.get("src/_2020/day02/input.txt"))
 				.filter(Puzzle::isCorrectPassword)
 				.count();
 		System.out.println(correctPasswordTotal1);
 
-		long correctPasswordTotal2 = Files.lines(Paths.get("src/_2020/day02/input1.txt"))
+		long correctPasswordTotal2 = Files.lines(Paths.get("src/_2020/day02/input.txt"))
 				.filter(Puzzle::isCorrectPassword2)
 				.count();
 		System.out.println(correctPasswordTotal2);

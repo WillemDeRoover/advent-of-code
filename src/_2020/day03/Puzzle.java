@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 public class Puzzle {
 
 	public static void main(String[] args) throws IOException {
-		char[][] geology = Files.lines(Paths.get("src/_2020/day03/input1.txt"))
+		char[][] geology = Files.lines(Paths.get("src/_2020/day03/input.txt"))
 				.map(String::toCharArray)
 				.toArray(char[][]::new);
 
