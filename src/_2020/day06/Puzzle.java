@@ -12,12 +12,13 @@ import java.util.stream.Stream;
 public class Puzzle {
 
 	public static void main(String[] args) throws IOException {
-		calculateAnyone();
-		calculateEveryone();
+		String[] allAnswers = Files.readString(Paths.get("src/_2020/day06/input.txt")).split("\\n\\n");
+		calculateAnyone(allAnswers);
+		calculateEveryone(allAnswers);
 	}
 
-	private static void calculateAnyone() throws IOException {
-		long total = Stream.of(Files.readString(Paths.get("src/_2020/day06/input.txt")).split("\\n\\n"))
+	private static void calculateAnyone(String[] allAnswers) throws IOException {
+		long total = Stream.of(allAnswers)
 				.map(s -> s.replaceAll("\\n", ""))
 				.mapToLong(s -> s.chars().distinct().count())
 				.sum();
@@ -25,8 +26,8 @@ public class Puzzle {
 		System.out.println(total);
 	}
 
-	private static void calculateEveryone() throws IOException {
-		long total = Stream.of(Files.readString(Paths.get("src/_2020/day06/input.txt")).split("\\n\\n"))
+	private static void calculateEveryone(String[] allAnswers) throws IOException {
+		long total = Stream.of(allAnswers)
 				.mapToLong(Puzzle::countAnswerByGroup)
 				.sum();
 
