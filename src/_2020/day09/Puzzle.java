@@ -19,6 +19,20 @@ public class Puzzle {
 		System.out.println("weakness: " + getWeakness(digits, invalidPosition));
 	}
 
+	private static int getInvalidPosition(List<Long> digits) {
+		for(int i = 25; i < digits.size(); i++) {
+			boolean found  = false;
+			for(int j = i - 25; j < i; j++) {
+				int first = j, current = i;
+				found = found || IntStream.range(j+1, i).anyMatch(second -> digits.get(first)+ digits.get(second) == digits.get(current));
+			}
+			if(!found) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
 	private static long getWeakness(List<Long> digits, int invalidPosition) {
 		long invalidNumber = digits.get(invalidPosition);
 		for(int i = 0; i < invalidPosition; i++) {
@@ -26,30 +40,9 @@ public class Puzzle {
 			for(int j = i; total < invalidNumber; j++) {
 				total += digits.get(j);
 				if(total == invalidNumber) {
-					long min = IntStream.range(i, j+1).mapToLong(digits::get).min().getAsLong();
-					long max = IntStream.range(i, j+1).mapToLong(digits::get).max().getAsLong();
-					return min + max;
-
+					List<Long> range = digits.subList(i, j + 1);
+					return range.stream().min(Long::compare).get() + range.stream().max(Long::compare).get();
 				}
-			}
-		}
-		return 0;
-	}
-
-	private static int getInvalidPosition(List<Long> digits) {
-		for(int i = 25; i < digits.size(); i++) {
-			int max = i-1;
-			int min = i - 25;
-			boolean found  = false;
-			for(int j = min; j <= max; j++) {
-				for(int k = j + 1; k <= max; k++) {
-					if(digits.get(j)+ digits.get(k) == digits.get(i)) {
-						found = true;
-					}
-				}
-			}
-			if(!found) {
-				return i;
 			}
 		}
 		return 0;
