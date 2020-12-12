@@ -12,60 +12,54 @@ public class Puzzle {
 		List<String> instructions = Files.lines(Paths.get("src/_2020/day12/input.txt"))
 				.collect(Collectors.toList());
 
-		int north = 0;
-		int east = 0;
-		int wayPointNorth = 1;
-		int wayPointEast = 10;
-//		List<int[]> vectors= List.of(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
+		int[] northEast = {0, 0};
+		int[] wpNorthEast = {1, 10};
 
-		int currentDirection = 0;
+//		List<int[]> vectors= List.of(new int[]{0, 1}, new int[]{-1, 0}, new int[]{0, -1}, new int[]{1, 0});
+//		int currentDirection = 0;
+
 		for (String instruction : instructions) {
 			String direction = instruction.substring(0, 1);
 			int amount = Integer.parseInt(instruction.substring(1));
 			if(direction.equals("N")) {
-//				north += amount;
-				wayPointNorth += amount;
+//				northEast[0] += amount;
+				wpNorthEast[0] += amount;
 			}
 			if(direction.equals("S")) {
-//				north -= amount;
-				wayPointNorth -= amount;
+//				northEast[0] -= amount;
+				wpNorthEast[0] -= amount;
 			}
 			if(direction.equals("E")) {
-//				east += amount;
-				wayPointEast += amount;
+//				northEast[1] += amount;
+				wpNorthEast[1] += amount;
 			}
 			if(direction.equals("W")) {
-//				east -= amount;
-				wayPointEast -= amount;
+//				northEast[1] -= amount;
+				wpNorthEast[1] -= amount;
 			}
 			if(direction.equals("F")) {
 //				int[] vector = vectors.get(currentDirection);
-				for(int i = 0; i< amount; i++) {
-					north +=  wayPointNorth;
-					east +=  wayPointEast;
-				}
+//				northEast[0] += amount * vector[0];
+//				northEast[1] += amount * vector[1];
+				northEast[0] += amount * wpNorthEast[0];
+				northEast[1] += amount * wpNorthEast[1];
 			}
 			if(direction.equals("R")) {
 				int turn = amount / 90;
 //				currentDirection = (currentDirection + turn) % vectors.size();
 				for(int i = 0; i < turn; i++) {
-					int temp = wayPointNorth;
-					wayPointNorth = wayPointEast * -1;
-					wayPointEast = temp;
+					wpNorthEast = new int[]{wpNorthEast[1] * -1, wpNorthEast[0]};
 				}
 			}
 			if(direction.equals("L")) {
 				int turn = amount / 90;
 //				currentDirection = (currentDirection - turn + vectors.size()) % vectors.size();
 				for(int i = 0; i < turn; i++) {
-					int temp = wayPointEast;
-					wayPointEast = wayPointNorth * -1;
-					wayPointNorth = temp;
+					wpNorthEast = new int[] {wpNorthEast[1], wpNorthEast[0] * -1};
 				}
 			}
 		}
 
-		System.out.println(Math.abs(north) + Math.abs(east));
-
+		System.out.println(Math.abs(northEast[0]) + Math.abs(northEast[1]));
 	}
 }
