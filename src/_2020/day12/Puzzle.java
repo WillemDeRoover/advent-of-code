@@ -1,16 +1,17 @@
 package _2020.day12;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Puzzle {
 
 	public static void main(String[] args) throws IOException {
 		List<String> instructions = Files.lines(Paths.get("src/_2020/day12/input.txt"))
-				.collect(Collectors.toList());
+				.collect(toList());
 
 		int[] northEast = {0, 0};
 		int[] wpNorthEast = {1, 10};
@@ -19,42 +20,42 @@ public class Puzzle {
 //		int currentDirection = 0;
 
 		for (String instruction : instructions) {
-			String direction = instruction.substring(0, 1);
+			char direction = instruction.charAt(0);
 			int amount = Integer.parseInt(instruction.substring(1));
-			if(direction.equals("N")) {
+			if(direction == 'N') {
 //				northEast[0] += amount;
 				wpNorthEast[0] += amount;
 			}
-			if(direction.equals("S")) {
+			if(direction == 'S') {
 //				northEast[0] -= amount;
 				wpNorthEast[0] -= amount;
 			}
-			if(direction.equals("E")) {
+			if(direction == 'E') {
 //				northEast[1] += amount;
 				wpNorthEast[1] += amount;
 			}
-			if(direction.equals("W")) {
+			if(direction == 'W') {
 //				northEast[1] -= amount;
 				wpNorthEast[1] -= amount;
 			}
-			if(direction.equals("F")) {
+			if(direction == 'F') {
 //				int[] vector = vectors.get(currentDirection);
 //				northEast[0] += amount * vector[0];
 //				northEast[1] += amount * vector[1];
 				northEast[0] += amount * wpNorthEast[0];
 				northEast[1] += amount * wpNorthEast[1];
 			}
-			if(direction.equals("R")) {
+			if(direction == 'R') {
 				int turn = amount / 90;
 //				currentDirection = (currentDirection + turn) % vectors.size();
-				for(int i = 0; i < turn; i++) {
+				while(turn-- > 0) {
 					wpNorthEast = new int[]{wpNorthEast[1] * -1, wpNorthEast[0]};
 				}
 			}
-			if(direction.equals("L")) {
+			if(direction == 'L') {
 				int turn = amount / 90;
 //				currentDirection = (currentDirection - turn + vectors.size()) % vectors.size();
-				for(int i = 0; i < turn; i++) {
+				while(turn-- > 0) {
 					wpNorthEast = new int[] {wpNorthEast[1], wpNorthEast[0] * -1};
 				}
 			}
