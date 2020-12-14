@@ -16,7 +16,7 @@ public class Puzzle {
 
 	public static void main(String[] args) throws IOException {
 
-		List<String> schedule = Files.lines(Paths.get("src/_2020/day13/input2.txt"))
+		List<String> schedule = Files.lines(Paths.get("src/_2020/day13/input.txt"))
 				.collect(toList());
 
 		int startTime = parseInt(schedule.get(0));
@@ -28,7 +28,6 @@ public class Puzzle {
 
 		getTimeUntilFirstBus(busses, startTime);
 		getTimestampSubsequentBusses(busses);
-
 	}
 
 	private static void getTimeUntilFirstBus(List<int[]> busses, int startTime) {
