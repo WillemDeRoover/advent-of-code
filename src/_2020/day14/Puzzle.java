@@ -17,19 +17,19 @@ public class Puzzle {
 	private static Pattern memoryPattern = Pattern.compile("mem\\[(\\d+)]\\s=\\s(\\d+)");
 
 	public static void main(String[] args) throws IOException {
-		String bitmask = null;
 		Map<Long, Long> memoryPart1 = new HashMap<>();
 		Map<Long, Long> memoryPart2 = new HashMap<>();
 
 		List<String> instructions = Files.lines(Paths.get("src/_2020/day14/input.txt"))
 				.collect(toList());
 
-		for (String s : instructions) {
-			if(s.startsWith("mask")) {
-				bitmask = s.replace("mask = ", "");
+		String bitmask = null;
+		for (String instruction : instructions) {
+			if(instruction.startsWith("mask")) {
+				bitmask = instruction.replace("mask = ", "");
 			}
 			else {
-				Matcher matcher = memoryPattern.matcher(s);
+				Matcher matcher = memoryPattern.matcher(instruction);
 				matcher.find();
 				long address = Long.parseLong(matcher.group(1));
 				long content = Long.parseLong(matcher.group(2));
@@ -41,7 +41,6 @@ public class Puzzle {
 
 		System.out.println(memoryPart1.values().stream().mapToLong(Long::longValue).sum());
 		System.out.println(memoryPart2.values().stream().mapToLong(Long::longValue).sum());
-
 	}
 
 	private static String toBinary(long content) {
@@ -74,13 +73,13 @@ public class Puzzle {
 		return createAddresses(builder.toString());
 	}
 
-	private static List<Long> createAddresses(String toString) {
-		if(!toString.contains("X")) {
-			return List.of(Long.parseLong(toString, 2));
+	private static List<Long> createAddresses(String address) {
+		if(!address.contains("X")) {
+			return List.of(Long.parseLong(address, 2));
 		} else {
 			List<Long> addresses = new ArrayList<>();
-			addresses.addAll(createAddresses(toString.replaceFirst("X", "0")));
-			addresses.addAll(createAddresses(toString.replaceFirst("X", "1")));
+			addresses.addAll(createAddresses(address.replaceFirst("X", "0")));
+			addresses.addAll(createAddresses(address.replaceFirst("X", "1")));
 			return addresses;
 		}
 	}
