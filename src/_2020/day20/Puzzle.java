@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +110,6 @@ public class Puzzle {
 	private static long calculateCornerControlDigit(Map<Integer, Set<Integer>> neighBourMap) {
 		return neighBourMap.entrySet()
 				.stream().filter(entry -> entry.getValue().size() == 2)
-				.peek(entry -> System.out.println(entry.getKey()))
 				.mapToLong(Map.Entry::getKey)
 				.reduce((e1, e2) -> e1 * e2).getAsLong();
 	}
