@@ -14,23 +14,23 @@ public class Puzzle {
 
 	public static void main(String[] args) {
 		List<Integer> circle = Stream.of("157623984".split("")).map(Integer::valueOf).collect(toList());
-		Map<Integer, Integer> nextCupMap = createNextCupMap(circle);
-		max = nextCupMap.values().stream().mapToInt(i -> i).max().getAsInt() + 1;
+		Map<Integer, Integer> nextCups = createNextCupMap(circle);
+		max = nextCups.values().stream().mapToInt(i -> i).max().getAsInt() + 1;
 
 		int currentCup = circle.get(0);
 		for(int i = 0; i < 10000000; i++) {
-			List<Integer> nextThreeCups = getNextThreeCups(currentCup, nextCupMap);
-			nextCupMap.put(currentCup, nextCupMap.get(nextThreeCups.get(2)));
+			List<Integer> nextThreeCups = getNextThreeCups(currentCup, nextCups);
+			nextCups.put(currentCup, nextCups.get(nextThreeCups.get(2)));
 
 			int destination = calculateDestination(currentCup, nextThreeCups);
-			nextCupMap.put(nextThreeCups.get(2), nextCupMap.get(destination));
-			nextCupMap.put(destination, nextThreeCups.get(0));
+			nextCups.put(nextThreeCups.get(2), nextCups.get(destination));
+			nextCups.put(destination, nextThreeCups.get(0));
 
-			currentCup = nextCupMap.get(currentCup);
+			currentCup = nextCups.get(currentCup);
 		}
 
-		int i1 = nextCupMap.get(1);
-		int i2 = nextCupMap.get(i1);
+		int i1 = nextCups.get(1);
+		int i2 = nextCups.get(i1);
 		System.out.println((long) i1 * i2);
 	}
 
