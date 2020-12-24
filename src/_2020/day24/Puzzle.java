@@ -31,14 +31,13 @@ public class Puzzle {
 		Set<List<Integer>> blackTiles= new HashSet<>();
 
 		for (String tileReference : tileReferences) {
-			String tilePath = tileReference;
-			List<Integer> currentTile = new ArrayList<>(Arrays.asList(0, 0));
-			while(!tilePath.isEmpty()) {
+			List<Integer> currentTile = Arrays.asList(0, 0);
+			while(!tileReference.isEmpty()) {
 				for (Direction direction : Direction.values()) {
-					if (tilePath.startsWith(direction.value)) {
+					if (tileReference.startsWith(direction.value)) {
 						currentTile.set(0, currentTile.get(0) +  direction.vector.get(0));
 						currentTile.set(1, currentTile.get(1) +  direction.vector.get(1));
-						tilePath = tilePath.replaceFirst(direction.value, "");
+						tileReference = tileReference.replaceFirst(direction.value, "");
 					}
 				}
 			}
