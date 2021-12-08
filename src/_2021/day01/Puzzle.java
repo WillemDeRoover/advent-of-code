@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class puzzle {
+public class Puzzle {
 
 	public static void main(String[] args) throws IOException {
 		int[] numbers = Files.lines(Paths.get("src/_2021/day01/input.txt"))
