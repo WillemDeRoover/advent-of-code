@@ -57,7 +57,6 @@ public class Puzzle {
 
 	private static int calculateBasin(Tupple root, List<List<Integer>> cave) {
 		Set<Tupple> basin = new HashSet<>();
-
 		Queue<Tupple> toBeProcessed = new LinkedList<>();
 		toBeProcessed.add(root);
 
@@ -86,6 +85,7 @@ public class Puzzle {
 		List<Tupple> getSides() {
 			return List.of(new Tupple(i - 1, j), new Tupple(i + 1, j), new Tupple(i, j - 1), new Tupple(i, j + 1));
 		}
+
 
 		@Override
 		public int hashCode() {
