@@ -3,7 +3,6 @@ package _2021.day13;
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -37,18 +36,17 @@ public class Puzzle {
 					.collect(toSet());
 		}
 
-		int[][] code = new int[10][100];
+		int[][] code = new int[10][50];
 		for (List<Integer> dot : dots) {
 			code[dot.get(1)][dot.get(0)] = 1;
 		}
 
-		for (int i = 0; i < code.length; i++) {
-			for (int j = 0; j < code[i].length; j++) {
-				System.out.print(code[i][j]);
+		for (int[] line : code) {
+			for (int digit : line) {
+				System.out.print(digit);
 			}
 			System.out.println();
 		}
-
 	}
 
 	private static List<Integer> fold(List<Integer> dot, int[] foldingInstruction) {
