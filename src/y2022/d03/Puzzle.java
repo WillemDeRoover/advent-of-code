@@ -42,7 +42,3 @@ public class Puzzle {
                 .stream().findFirst().get();
     }
 }
-
-
-
-
