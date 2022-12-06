@@ -8,11 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.toList;
 
 public class Puzzle {
 
@@ -21,19 +22,17 @@ public class Puzzle {
     private static final List<Stack<String>> stacks = IntStream.range(0, STACK_AMOUNT).mapToObj(__ -> new Stack<String>()).toList();
 
     public static void main(String[] args) throws IOException {
-        List<String> setup = Files.lines(Paths.get("src/y2022/d05/input2.txt"))
-                .takeWhile(Predicate.not(String::isEmpty))
-                .collect(Collectors.toList());
+        List<String> setup = Files.lines(Paths.get("src/y2022/d05/input.txt"))
+                .takeWhile(not(String::isEmpty))
+                .collect(toList());
         Collections.reverse(setup);
-        setup.stream()
-                .skip(1)
-                .forEach(Puzzle::addToStack);
+        setup.stream().skip(1).forEach(Puzzle::addToStack);
 
-        Files.lines(Paths.get("src/y2022/d05/input2.txt"))
-                .dropWhile(Predicate.not(String::isEmpty))
+        Files.lines(Paths.get("src/y2022/d05/input.txt"))
+                .dropWhile(not(String::isEmpty))
                 .skip(1)
                 .map(Puzzle::parseInstruction)
-                .forEach(instruction -> replaceAll(instruction, stacks));
+                .forEach(Puzzle::replaceAll);
 
         stacks.stream().map(Stack::pop).forEach(System.out::print);
     }
@@ -53,7 +52,7 @@ public class Puzzle {
         return IntStream.range(1, matcher.groupCount() + 1).mapToObj(matcher::group).mapToInt(Integer::parseInt).toArray();
     }
 
-    private static void replace(int[] instruction, List<Stack<String>> stacks) {
+    private static void replace(int[] instruction) {
         Queue<String> crane = new LinkedList<>();
         for (int i = 0; i < instruction[0]; i++) {
             crane.add(stacks.get(instruction[1] - 1).pop());
@@ -63,7 +62,7 @@ public class Puzzle {
         }
     }
 
-    private static void replaceAll(int[] instruction, List<Stack<String>> stacks) {
+    private static void replaceAll(int[] instruction) {
         Stack<String> crane = new Stack<>();
         for (int i = 0; i < instruction[0]; i++) {
             crane.push(stacks.get(instruction[1] - 1).pop());
