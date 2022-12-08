@@ -25,8 +25,8 @@ public class Puzzle {
     }
 
     private static boolean containsDistinctCharacters(String marker) {
-        return marker.chars()
-                .mapToObj(i -> (char) i)
+        return IntStream.range(0, marker.length())
+                .mapToObj(marker::charAt)
                 .collect(collectingAndThen(
                         toCollection(HashSet::new),
                         distinct -> distinct.size() == marker.length()));
