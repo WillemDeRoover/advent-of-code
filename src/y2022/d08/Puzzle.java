@@ -43,13 +43,13 @@ public class Puzzle {
     private static int calculateScenic(int[][] trees, int x, int y) {
         int tree = trees[y][x];
 
-        return calculateVisibility(tree, IntStream.range(0, x).map(i -> (x - 1) - i).mapToObj(i -> trees[y][i]).toList())
-                * calculateVisibility(tree, IntStream.range(0, y).map(i1 -> (y - 1) - i1).mapToObj(i1 -> trees[i1][x]).toList())
-                * calculateVisibility(tree, IntStream.range(x + 1, trees[0].length).mapToObj(i2 -> trees[y][i2]).toList())
-                * calculateVisibility(tree, IntStream.range(y + 1, trees.length).mapToObj(i3 -> trees[i3][x]).toList());
+        return calculateScenic(tree, IntStream.iterate(x - 1, i -> i >= 0, i -> i - 1).mapToObj(i -> trees[y][i]).toList())
+                * calculateScenic(tree, IntStream.iterate(y - 1, i -> i >= 0, i -> i - 1).mapToObj(i1 -> trees[i1][x]).toList())
+                * calculateScenic(tree, IntStream.range(x + 1, trees[0].length).mapToObj(i -> trees[y][i]).toList())
+                * calculateScenic(tree, IntStream.range(y + 1, trees.length).mapToObj(i -> trees[i][x]).toList());
     }
 
-    private static int calculateVisibility(int tree, List<Integer> trees) {
+    private static int calculateScenic(int tree, List<Integer> trees) {
         int count = 0;
         for (Integer value : trees) {
             count++;
