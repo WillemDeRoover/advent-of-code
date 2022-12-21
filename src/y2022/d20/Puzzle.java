@@ -1,162 +1,64 @@
-package y2022.d19;
+package y2022.d20;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Puzzle {
 
-    private static final int ORE = 0;
-    private static final int CLAY = 1;
-    private static final int OBSIDIAN = 2;
-    private static final int GEODE = 3;
-
-
-    private static final Pattern pattern = Pattern.compile("\\d+");
-    private static int minutes;
+    private static Map<Integer, Integer> initOrder = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
-        List<Blueprints> blueprints = Files.lines(Paths.get("src/y2022/d19/input.txt"))
-                .map(Puzzle.Blueprints::parse)
+        List<Long> initial = Files.lines(Paths.get("src/y2022/d20/input.txt"))
+                .filter(Predicate.not(String::isEmpty))
+                .map(Integer::parseInt)
+                .map(i -> 811589153L * i)
                 .toList();
 
-        part1(blueprints);
-        part2(blueprints);
-    }
 
-    private static void part1(List<Blueprints> Blueprints) {
-        minutes = 24;
-        int part1 = 0;
-        for (int i = 0; i < Blueprints.size(); i++) {
-            int quality = (i + 1) * collectMax(Blueprints.get(i));
-            part1 += quality;
-        }
-        System.out.println("part1 = " + part1);
-    }
+        List<Pair> pairs = IntStream.range(0, initial.size())
+                .mapToObj(i -> new Pair(initial.get(i), i))
+                .collect(Collectors.toList());
 
-    private static void part2(List<Blueprints> Blueprints) {
-        minutes = 32;
-        long part2 = 1;
-        for (int i = 0; i < 3; i++) {
-            part2 *= collectMax(Blueprints.get(i));
-        }
-        System.out.println("part2 = " + part2);
-    }
 
-    private static int collectMax(Blueprints blueprints) {
-        int[] robots = {1, 0, 0, 0};
-        int[] resources = {0, 0, 0, 0};
+        for (int j = 0; j < 10; j++) {
+            for (int i = 0; i < initial.size(); i++) {
+                Pair pair = new Pair(initial.get(i), i);
+                int index = pairs.indexOf(pair);
+                pairs.remove(index);
 
-        return collectMax(new State(robots, resources, 1), blueprints, null);
-    }
-
-    private static int collectMax(State current, Blueprints blueprints, BluePrint nextRobot) {
-
-        
-        if (current.time > minutes) {
-            return current.resources[GEODE];
-        }
-
-        if (nextRobot == null) {
-            return current.nextRobots(blueprints).stream()
-                    .mapToInt(nr -> collectMax(current, blueprints, nr))
-                    .max()
-                    .getAsInt();
-        } else {
-            boolean hadEnoughResources = current.hasEnoughResource(nextRobot);
-            State next = current.harvest();
-            if (hadEnoughResources) {
-                next = next.build(nextRobot);
-                return collectMax(next, blueprints, null);
+                long nextIndex = index + pair.value;
+                while (nextIndex < 0 || nextIndex > initial.size()) {
+                    nextIndex = (nextIndex + (initial.size() - 1)) % (initial.size() - 1);
+                }
+                pairs.add((int) nextIndex, pair);
             }
-            return collectMax(next, blueprints, nextRobot);
-
         }
+
+        Pair zeroPair = pairs.stream()
+                .filter(p -> p.value == 0)
+                .findFirst().get();
+
+        int i0 = pairs.indexOf(zeroPair);
+
+        long sum = IntStream.rangeClosed(1, 3)
+                .map(i -> i * 1000)
+                .map(i -> (i + i0) % pairs.size())
+                .mapToLong(i -> pairs.get(i).value)
+                .sum();
+        System.out.println("sum = " + sum);
 
     }
 
-    record State(int[] robots, int[] resources, int time) {
-
-        public State harvest() {
-            int[] nextResources = IntStream.range(0, 4)
-                    .map(i -> resources[i] + robots[i])
-                    .toArray();
-            return new State(robots, nextResources, time + 1);
-        }
-
-        public List<BluePrint> nextRobots(Blueprints blueprints) {
-            List<BluePrint> nextBluePrints = new ArrayList<>();
-
-            if (robots[OBSIDIAN] == 0
-                    && blueprints.asList().stream().anyMatch(bp -> robots[ORE] < bp.required[ORE])
-                    && time < 10) {
-                nextBluePrints.add(blueprints.oreBluePrint);
-            }
-            if (robots[GEODE] == 0
-                    && blueprints.asList().stream().anyMatch(bp -> robots[CLAY] < bp.required[CLAY])
-                    && time < 20) {
-                nextBluePrints.add(blueprints.clayRobot);
-            }
-            if (robots[CLAY] != 0) {
-                nextBluePrints.add(blueprints.obsidianBluePrint);
-            }
-            if (robots[OBSIDIAN] != 0) {
-                nextBluePrints.add(blueprints.geodeBluePrint);
-            }
-
-            return nextBluePrints;
-        }
-
-        public boolean hasEnoughResource(BluePrint bluePrint) {
-            return IntStream.range(0, 3)
-                    .allMatch(i -> bluePrint.required[i] <= resources[i]);
-        }
-
-        public State build(BluePrint nextRobot) {
-            int[] nextResources = IntStream.range(0, 4)
-                    .map(i -> resources[i] - nextRobot.required[i])
-                    .toArray();
-            int[] nextRobots = Arrays.copyOf(robots, robots.length);
-            nextRobots[nextRobot.kind]++;
-            return new State(nextRobots, nextResources, time);
-        }
+    record Pair(long value, int initial) {
     }
-
-
-    record BluePrint(int[] required, int kind) {
-
-    }
-
-    record Blueprints(BluePrint oreBluePrint, BluePrint clayRobot, BluePrint obsidianBluePrint,
-                      BluePrint geodeBluePrint) {
-
-
-        static Blueprints parse(String s) {
-            Matcher matcher = pattern.matcher(s);
-            List<Integer> integers = matcher.results()
-                    .map(MatchResult::group)
-                    .map(Integer::parseInt)
-                    .toList();
-
-            return new Blueprints(
-                    new BluePrint(new int[]{integers.get(1), 0, 0, 0}, ORE),
-                    new BluePrint(new int[]{integers.get(2), 0, 0, 0}, CLAY),
-                    new BluePrint(new int[]{integers.get(3), integers.get(4), 0, 0}, OBSIDIAN),
-                    new BluePrint(new int[]{integers.get(5), 0, integers.get(6), 0}, GEODE)
-            );
-        }
-
-        List<BluePrint> asList() {
-            return List.of(oreBluePrint, clayRobot, obsidianBluePrint, geodeBluePrint);
-        }
-    }
-
 
 }
